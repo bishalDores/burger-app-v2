@@ -5,25 +5,31 @@ import Aux from '../ReactAux/ReactAux';
 
 
 const withErrorHandlers = (WrapperComponent,axios) => {
-  return class extends Component{
+    return class extends Component{
 
-      state = {
-          error: null
-      }
+        state = {
+            error: null
+        };
 
-      componentWillMount () {
-          axios.interceptors.request.use(req => {
-              this.setState({error:null});
-              return req;
-          })
-          axios.interceptors.response.use(res => res,error => {
-             this.setState({error:error})
-          });
-      }
+        componentWillMount () {
+            this.reqInterceptor = axios.interceptors.request.use(req => {
+                this.setState({error:null});
+                return req;
+            });
+            this.resInterceptor = axios.interceptors.response.use(res => res,error => {
+                this.setState({error:error})
+            });
+        }
 
-      errorConfirmHandler = () => {
-          this.setState({error:null})
-      };
+        componentWillUnmount(){
+            // console.log('Will Unmount');
+            axios.interceptors.request.eject(this.reqInterceptor);
+            axios.interceptors.response.eject(this.resInterceptor);
+        }
+
+        errorConfirmHandler = () => {
+            this.setState({error:null})
+        };
 
 
         render(){
@@ -39,6 +45,6 @@ const withErrorHandlers = (WrapperComponent,axios) => {
                 </Aux>
             )
         }
-  }
+    }
 };
 export default withErrorHandlers;
